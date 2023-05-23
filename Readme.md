@@ -27,8 +27,7 @@
     <ol start="17">
         <li><a href="/module_3/17.%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D1%8B%20HTML">Основы HTML</a></li>
         <li><a href="/module_3/18.%20CSS-%D1%81%D1%82%D0%B8%D0%BB%D0%B8">CSS-стили</a></li>
-        <li>Урок 19. Фреймворк Flask</li>
-        <li>Фреймворк Flask</li>
+        <li><a href="/module_3/19.%20%D0%A4%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA%20Flask">Фреймворк Flask</a></li>
         <li>Шаблонизатор Jinja</li>
         <li>Доработка блога. Часть 1</li>
         <li>Доработка блога. Часть 2</li>
