@@ -1,5 +1,8 @@
 #pip install cowsay
 # $> sowsay.say("moo")
 
+
+
 import cowsay
-cowsay.moo("moo")
+cowsay.cow("moo")
+cowsay.cow("foo")
