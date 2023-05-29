@@ -1,22 +1,16 @@
-# Задание: Добавьте команду /help, которая будет
-#          выводить список всех доступных команд.
-#          Подсказка: используйте метод get_bot_commands
-#          Удалите хендлер echo, он больше не нужен.
-#          Вместо него должна быть отбивка о неизвестной команде.
-#          Важно зарегистрировать хендлер для неизвестной
-#          команды последним, чтобы он не перехватывал другие команды.
-#          Добавьте команду /start, которая будет выводить
-#          приветственное сообщение с подсказкой воспользоваться /help.
+# Задание: Добавить обработку кнопок /weather и /change_city
 
 
-import random
 import time
 import operator
 
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
+import buttons
 import config
+import keyboards
+from custom_filters import button_filter
 
 bot = Client(
     api_id=config.API_ID,
@@ -26,7 +20,7 @@ bot = Client(
 )
 
 
-@bot.on_message(filters=filters.command("time"))
+@bot.on_message(filters=filters.command("time") | button_filter(buttons.time_button))
 async def time_command(client: Client, message: Message):
     current_time = time.strftime("%H:%M:%S")
     await message.reply(f"Текущее время: {current_time}")
@@ -61,7 +55,7 @@ async def calc_command(client: Client, message: Message):
     await message.reply(f"Результат: {op(left, right)}")
 
 
-@bot.on_message(filters=filters.command("help"))
+@bot.on_message(filters=filters.command("help") | button_filter(buttons.help_button))
 async def help_command(client: Client, message: Message):
     commands = await bot.get_bot_commands()
     text_commands = ""
@@ -70,11 +64,34 @@ async def help_command(client: Client, message: Message):
     await message.reply(f"Список доступных команд:\n{text_commands}")
 
 
-@bot.on_message(filters=filters.command("start"))
+@bot.on_message(filters=filters.command("start") | button_filter(buttons.back_button))
 async def start_command(client: Client, message: Message):
     await message.reply(
         "Привет! Я бот, который умеет считать и показывать время.\n"
-        f"Нажми на /help, чтобы узнать, что я умею."
+        f"Нажми на кнопку {buttons.help_button.text} для получения списка команд.",
+        reply_markup=keyboards.main_keyboard
+    )
+
+
+@bot.on_message(filters=filters.command("settings") | button_filter(buttons.settings_button))
+async def settings_command(client: Client, message: Message):
+    await message.reply(
+        "Настройки",
+        reply_markup=keyboards.settings_keyboard
+    )
+
+
+@bot.on_message(filters=filters.command("weather") | button_filter(buttons.weather_button))
+async def weather_command(client: Client, message: Message):
+    await message.reply(
+        "Я пока не умею показывать погоду, но скоро научусь!"
+    )
+
+
+@bot.on_message(filters=filters.command("change_city") | button_filter(buttons.change_city_button))
+async def change_city_command(client: Client, message: Message):
+    await message.reply(
+        "Эта функция пока не работает, но скоро заработает!"
     )
 
 
