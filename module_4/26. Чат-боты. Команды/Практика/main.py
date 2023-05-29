@@ -27,13 +27,13 @@ bot = Client(
 
 
 @bot.on_message(filters=filters.command("time"))
-async def command_time(client: Client, message: Message):
+async def time_command(client: Client, message: Message):
     current_time = time.strftime("%H:%M:%S")
     await message.reply(f"Текущее время: {current_time}")
 
 
 @bot.on_message(filters=filters.command("calc"))
-async def command_calc(client: Client, message: Message):
+async def calc_command(client: Client, message: Message):
     ops = {
         "+": operator.add, "-": operator.sub,
         "*": operator.mul, "/": operator.truediv,
