@@ -1,4 +1,7 @@
-age = 10
-if age == 10:
-   print('Что нельзя съесть на завтрак?')
-   print('Обед и ужин!')
+a = 10
+b = 20
+if a>20:
+   if b<90:
+      print('wow')
+if a+b>20:
+   print('amazing')
