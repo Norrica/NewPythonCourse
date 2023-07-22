@@ -12,7 +12,7 @@ main_keyboard = ReplyKeyboardMarkup(
 
 settings_keyboard = ReplyKeyboardMarkup(
     keyboard=[
-        [buttons.change_city_button, buttons.back_button],
+        [buttons.back_button],
     ],
     resize_keyboard=True,
 )
