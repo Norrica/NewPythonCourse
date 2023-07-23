@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content flex-grow-1">
+    <div class="top">
+        <div class="container d-flex flex-column h-100">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <a class="navbar-brand" href="/index/"><img src="/static/img/logo.png" alt="logo"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarNavAltMarkup"
+                        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link active" href="/index/">Обо мне</a>
+                        <a class="nav-link" href="/blog/">Блог</a>
+                        <a class="nav-link" href="/contacts/">Контакты</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="d-flex flex-column justify-content-center flex-grow-1">
+                <h1>Привет!</h1>
+                <h1>Меня зовут Матвей</h1>
+                <p class="top__text">Добро пожаловать на мою страницу</p>
+            </div>
+        </div>
+    </div>
+    <div class="about" id="about">
+        <div class="container">
+            <div class="row about d-flex justify-content-center align-items-center">
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    <img class="w-75" src="/static/img/about-photo.png" alt="my photo">
+                </div>
+                <div class="col-md-5">
+                    <h2 class="heading">Еще раз привет!</h2>
+                    <p class="text">Я начинающий разработчик на Python и это мой первый сайт. Я живу и учусь в
+                        Москве,
+                        в свободное время играю в компьютерные игры и гуляю с друзьями.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container why">
+        <h2 class="heading text-center mb-3">Почему мне нравится<br>программировать?</h2>
+        <div class="row text-center">
+            {% for reason in reasons %}
+            <div class="col-md-4 d-flex flex-column justify-content-end">
+                <div class="card">
+                    <img src="{{ reason.photo }}" alt="photo">
+                    <div class="card-box">
+                        <p class="card-text pl-5 pr-5 mt-3">{{ reason.text }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

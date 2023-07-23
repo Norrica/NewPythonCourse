@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content flex-grow-1">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="/index/"><img src="/static/img/logo.png" alt="logo"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/index/">Обо мне</a>
+                    <a class="nav-link active" href="/blog/">Блог</a>
+                    <a class="nav-link" href="/contacts/">Контакты</a>
+                </div>
+            </div>
+        </nav>
+        <h1 class="text-dark pt-5 pb-5">Блог</h1>
+        <div class="row pb-5">
+            {% for post in posts %}
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="card blog-card mb-4">
+                    <img src="{{ post.photo }}" class="card-img-top" alt="photo">
+                    <div class="card-body blog-content">
+                        <h5 class="blog-heading pb-3">{{ post.heading }}</h5>
+                        <p class="blog-text">{{ post.text }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
