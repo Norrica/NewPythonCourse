@@ -1,0 +1,115 @@
+body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+}
+
+.top {
+    height: 775px;
+    background-image: url(../img/top-back.svg);
+    background-size: cover;
+}
+
+.top__text {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.navbar {
+    padding-top: 32px;
+}
+
+.navbar-nav .active {
+    font-weight: bold;
+    color: #EA482B !important;
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.heading {
+    font-weight: bold;
+    font-size: 2rem;
+    color: #382D16;
+}
+
+.text {
+    font-weight: normal;
+    font-size: 1.2rem;
+    line-height: 2rem;
+}
+
+/* Стили для блока обо мне */
+
+.about {
+    background: #F1F1F4;
+    min-height: 504px;
+}
+
+/* Стили для блока почему мне нравится программировать */
+
+.why {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+}
+
+.card {
+    border: none;
+}
+
+.card-box {
+    height: 115px;
+}
+
+/* Стили для Подвала сайта */
+
+.footer {
+    background: #382D16;
+    height: 216px;
+    padding-top: 56px;
+}
+
+
+/* Стили для страницы Блог */
+
+.blog-body {
+    background: #F1F1F4;
+}
+
+.blog-heading {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #382D16;
+}
+
+.blog-text {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 17px;
+    line-height: 24px;
+    color: #382D16;
+}
+
+.blog-content {
+    padding: 2rem;
+}
+
+.blog-card {
+    border-radius: 16px;
+    height: 100%;
+}
+
+/* Стили для страницы Контакты */
+
+.contacts-top {
+    min-height: 639px;
+    background: #F1F1F4;
+}
+
+.contacts-info {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+}
