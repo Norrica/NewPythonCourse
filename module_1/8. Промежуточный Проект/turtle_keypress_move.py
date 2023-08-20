@@ -8,11 +8,16 @@ def move(heading, pixels=100):
     turtle.forward(pixels)
 
 
+pixels = 10
 funcs = {
-    'w': lambda: move(90, 100),
-    'a': lambda: move(180, 100),
-    's': lambda: move(270, 100),
-    'd': lambda: move(0, 100)
+    'w': lambda: move(90, pixels),
+    'a': lambda: move(180, pixels),
+    's': lambda: move(270, pixels),
+    'd': lambda: move(0, pixels),
+    'e': lambda: turtle.right(pixels),
+    'q': lambda: turtle.left(pixels),
+    'space': lambda: turtle.forward(pixels),
+
 }
 
 for k, v in funcs.items():

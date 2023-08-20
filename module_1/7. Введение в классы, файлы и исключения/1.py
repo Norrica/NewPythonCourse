@@ -1,0 +1,2 @@
+class MyCoolClass():
+	pass
