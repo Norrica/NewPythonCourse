@@ -8,3 +8,6 @@
 
 *config.py
 *sesion
+
+*.session
+*.session-journal
