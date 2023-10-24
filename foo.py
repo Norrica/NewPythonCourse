@@ -2,10 +2,10 @@ import time
 
 import pyautogui
 import pyperclip
-from pynput import keyboard
+from pynput import keyboard, mouse
 
 pyautogui.PAUSE = 0.2
-
+pyautogui.move
 
 def make_border():
     pyautogui.click(1489, 241)
@@ -17,6 +17,39 @@ def make_border():
     pyautogui.hotkey('ctrl', 'right')
 
 
+def copy_slide_text():
+    time.sleep(0.2)
+    pyautogui.PAUSE = 0.2
+    pyautogui.hotkey('ctrl', 'shift', 'tab')
+    pyautogui.press('esc')
+    pyautogui.press('esc')
+    pyautogui.press('esc')
+    for i in range(3): # Выбирается в порядке редактирования.
+        pyautogui.press('tab')
+    pyautogui.press('enter')
+    pyautogui.press('apps')  # pyautogui.hotkey('ctrl','c')
+    pyautogui.press('down')
+    pyautogui.press('down')
+    pyautogui.press('enter')
+    pyautogui.hotkey('ctrl', 'tab')
+    pyautogui.press('esc')
+    pyautogui.press('up')
+    pyautogui.press('end')
+    pyautogui.press('enter')
+    pyautogui.press('backspace')
+    pyautogui.press('backspace')
+    pyautogui.press('esc')
+    pyautogui.press('apps')  # pyautogui.hotkey('ctrl','shift','v')
+    pyautogui.press('down')
+    pyautogui.press('down')
+    pyautogui.press('enter')
+    pyautogui.press('down')
+    pyautogui.press('down')
+    pyautogui.press('down')
+    pyautogui.click(176, 810)
+    pyautogui.hotkey('ctrl', 'tab')
+
+
 def copy_slide_to_doc():
     # pyautogui.press('down')
     # pyautogui.press('down')
@@ -24,13 +57,14 @@ def copy_slide_to_doc():
     pyautogui.press('esc')
     pyautogui.press('esc')
     pyautogui.press('esc')
-    # pyautogui.press('down')
+    pyautogui.press('down')
     pyautogui.press('apps')
     pyautogui.press('down')
     pyautogui.press('down')
     pyautogui.press('enter')
     time.sleep(1)
     pyautogui.hotkey('ctrl', 'tab')
+    pyautogui.press('esc')
     pyautogui.press('apps')
     pyautogui.press('down')
     pyautogui.press('enter')
@@ -46,8 +80,12 @@ def make_8cm_wide():
     pyautogui.click(1705, 279)
     time.sleep(0.2)
     pyautogui.doubleClick(1507, 431)
-    pyautogui.write('8.5')
-    pyautogui.click(1795, 247)
+    pyautogui.write('8')
+    pyautogui.PAUSE = 0.05
+    for i in range(5):
+        pyautogui.click(1559, 435)
+    pyautogui.PAUSE = 0.2
+    pyautogui.click(1795, 235)
     pyautogui.press('right')
 
 
@@ -58,37 +96,6 @@ def remove_old_slide_names():
     with pyautogui.hold('shift'):
         pyautogui.press('end')
     pyautogui.press('backspace')
-
-
-def copy_slide_text():
-    time.sleep(0.2)
-    pyautogui.PAUSE = 0.2
-    pyautogui.hotkey('ctrl', 'shift', 'tab')
-    pyautogui.press('esc')
-    pyautogui.press('esc')
-    pyautogui.press('esc')
-    pyautogui.press('down')
-    pyautogui.press('tab')
-    pyautogui.press('enter')
-    # pyautogui.hotkey('ctrl','c')
-    pyautogui.press('apps')
-    pyautogui.press('down')
-    pyautogui.press('down')
-    pyautogui.press('enter')
-    pyautogui.hotkey('ctrl', 'tab')
-    pyautogui.press('esc')
-    pyautogui.press('down')
-    pyautogui.press('down')
-    pyautogui.press('end')
-    pyautogui.press('enter')
-    # pyautogui.press('backspace')
-    # pyautogui.press('backspace')
-    pyautogui.press('esc')
-    # pyautogui.hotkey('ctrl','shift','v')
-    pyautogui.press('apps')
-    pyautogui.press('down')
-    pyautogui.press('down')
-    pyautogui.press('enter')
 
 
 # Определение горячей клавиши
@@ -155,22 +162,28 @@ def replace_text():
 
 hotkey = keyboard.GlobalHotKeys({
     '<ctrl>+<shift>': replace_text,
-    '<alt>+8': remove_old_slide_names(),
+    '<alt>+8': remove_old_slide_names
 })
+
 
 def caller(key):
     if key == keyboard.Key.pause:
+        x, y = pyautogui.position()
         make_border()
         time.sleep(0.5)
         make_8cm_wide()
+        pyautogui.moveTo(x, y)
     if key == keyboard.Key.scroll_lock:
         copy_slide_to_doc()
     if key == keyboard.Key.f9:
         copy_slide_text()
+    if key == keyboard.Key.ctrl_r:
+        remove_old_slide_names()
 
-#f9  - pause - scroll_lock
+
+# - pause - f9   - scroll_lock
 
 l = keyboard.Listener(on_press=caller)
+# hotkey.run()
 l.run()
 # Запуск слушателя
-hotkey.run()

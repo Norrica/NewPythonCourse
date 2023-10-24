@@ -17,6 +17,7 @@ def main():
         #3
         display.fill('white')
         pg.display.update()
+        pg.time.delay(1000/60)
 
 
 if __name__ == '__main__':
