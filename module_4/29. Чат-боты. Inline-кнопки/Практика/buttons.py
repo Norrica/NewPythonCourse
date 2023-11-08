@@ -15,8 +15,8 @@ cats_button = KeyboardButton(f"{emoji.CAT} Котики")
 change_city_button = KeyboardButton(f"{emoji.CITYSCAPE} Изменить город")
 
 # Инлайн кнопки
-weather_current_inline_button = InlineKeyboardButton(f"{emoji.FIVE_O_CLOCK} Погода сейчас", callback_data="weather_current")
-weather_forecast_inline_button = InlineKeyboardButton(f"{emoji.CALENDAR} Прогноз погоды", callback_data="weather_forecast")
+weather_current_inline_button = InlineKeyboardButton(f"{emoji.FIVE_O_CLOCK} Погода сейчас", "weather_current")
+weather_forecast_inline_button = InlineKeyboardButton(f"{emoji.CALENDAR} Прогноз погоды", "weather_forecast")
 
 # Кнопки для котиков
 cats_random_inline_button = InlineKeyboardButton(f"{emoji.CAT} Случайный котик", callback_data="cats_random")
