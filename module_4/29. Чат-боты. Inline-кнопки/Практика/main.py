@@ -90,7 +90,10 @@ async def weather_command(client: Client, message: Message):
 
     weather = get_current_weather(city)
 
-    await message.reply(weather, reply_markup=keyboards.weather_inline_keyboard)
+    await message.reply(
+        weather,
+        reply_markup=keyboards.weather_inline_keyboard
+    )
 
 
 @bot.on_callback_query(filters=inline_button_filter(buttons.weather_current_inline_button))
@@ -100,7 +103,10 @@ async def weather_current_inline_button_callback(client: Client, query: Callback
     if weather == query.message.text:
         return
 
-    await query.message.edit_text(weather, reply_markup=keyboards.weather_inline_keyboard)
+    await query.message.edit_text(
+        weather,
+        reply_markup=keyboards.weather_inline_keyboard
+    )
 
 
 @bot.on_callback_query(filters=inline_button_filter(buttons.weather_forecast_inline_button))
@@ -110,7 +116,10 @@ async def weather_forecast_inline_button_callback(client: Client, query: Callbac
     if weather == query.message.text:
         return
 
-    await query.message.edit_text(weather, reply_markup=keyboards.weather_inline_keyboard)
+    await query.message.edit_text(
+        weather,
+        reply_markup=keyboards.weather_inline_keyboard
+    )
 
 
 @bot.on_message(filters=filters.command("change_city") | button_filter(buttons.change_city_button))
@@ -121,7 +130,7 @@ async def change_city_command(client: Client, message: Message):
 
 
 @bot.on_message(filters=filters.command("cats") | button_filter(buttons.cats_button))
-async def test_command(client: Client, message: Message):
+async def cats_command(client: Client, message: Message):
     cat = get_random_cat()
     await client.send_photo(
         chat_id=message.chat.id,

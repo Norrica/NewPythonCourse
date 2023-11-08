@@ -18,14 +18,14 @@ settings_keyboard = ReplyKeyboardMarkup(
 )
 
 weather_inline_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
+    [
         [buttons.weather_current_inline_button],
         [buttons.weather_forecast_inline_button],
     ],
 )
 
 cats_inline_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
+    [
         [buttons.cats_random_inline_button],
     ],
 )
