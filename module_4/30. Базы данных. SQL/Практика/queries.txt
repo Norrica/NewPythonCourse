@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  city TEXT
+);
+
+INSERT INTO users (id, city) VALUES (506702351, 'Moscow');
