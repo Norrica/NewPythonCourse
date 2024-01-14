@@ -8,27 +8,38 @@ class User:
 
 
 class Database:
-    def __init__(self, path: str):
-        self.connection = sqlite3.connect(path)
+    def __init__(self):
+        self.connection = sqlite3.connect("sqlite.db")
         self.cursor = self.connection.cursor()
 
     def get_user(self, user_id: int) -> User | None:
-        user = self.cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-        if user is None:
+        query = "SELECT * FROM users WHERE id = ?"
+        args = (user_id,)
+        self.cursor.execute(query, args)
+        row = self.cursor.fetchone()
+        if row is None:
             return None
 
-        return User(user_id=user_id, city=user[1])
+        return User(user_id=user_id, city=row[1])
 
     def create_user(self, user_id: int):
-        self.cursor.execute("INSERT INTO users(id) VALUES (?)", (user_id,))
+        query = "INSERT INTO users(id) VALUES (?)"
+        args = (user_id,)
+        self.cursor.execute(query, args)
         self.connection.commit()
 
     def set_city(self, user_id: int, city: str):
-        self.cursor.execute("UPDATE users SET city = ? WHERE id = ?", (city, user_id))
+        query = "UPDATE users SET city = ? WHERE id = ?"
+        args = (city, user_id)
+        self.cursor.execute(query, args)
         self.connection.commit()
 
     def get_users_count(self) -> int:
-        return self.cursor.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        query = "SELECT COUNT(*) FROM users"
+        self.cursor.execute(query)
+        row = self.cursor.fetchone()
+
+        return row[0]
 
     def close(self):
         self.connection.close()
