@@ -16,7 +16,11 @@ from database import Database
 class Client(Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.database = Database("sqlite.db")
+        self.database = Database()
+
+    def stop(self, *args, **kwargs):
+        self.database.close()
+        return super().stop(*args, **kwargs)
 
 
 bot = Client(
@@ -74,6 +78,7 @@ async def help_command(client: Client, message: Message):
 @bot.on_message(filters=filters.command("start") | button_filter(buttons.back_button))
 async def start_command(client: Client, message: Message):
     user = client.database.get_user(message.from_user.id)
+    print(user.__dict__ if user else None)
     if user is None:
         client.database.create_user(message.from_user.id)
 
@@ -97,11 +102,11 @@ async def weather_command(client: Client, message: Message):
     if message.command and len(message.command) > 1:
         city = message.command[1]
     else:
-        city = "Москва"
-
         user = client.database.get_user(message.from_user.id)
         if user is not None and user.city is not None:
             city = user.city
+        else:
+            city = "Москва"
 
     weather = get_current_weather(city)
 
@@ -113,11 +118,11 @@ async def weather_command(client: Client, message: Message):
 
 @bot.on_callback_query(filters=inline_button_filter(buttons.weather_current_inline_button))
 async def weather_current_inline_button_callback(client: Client, query: CallbackQuery):
-    city = "Москва"
-
     user = client.database.get_user(query.from_user.id)
     if user is not None and user.city is not None:
         city = user.city
+    else:
+        city = "Москва"
 
     weather = get_current_weather(city)
     if weather == query.message.text:
@@ -131,11 +136,11 @@ async def weather_current_inline_button_callback(client: Client, query: Callback
 
 @bot.on_callback_query(filters=inline_button_filter(buttons.weather_forecast_inline_button))
 async def weather_forecast_inline_button_callback(client: Client, query: CallbackQuery):
-    city = "Москва"
-
     user = client.database.get_user(query.from_user.id)
     if user is not None and user.city is not None:
         city = user.city
+    else:
+        city = "Москва"
 
     weather = get_forecast(city)
     if weather == query.message.text:
@@ -197,7 +202,6 @@ async def info_command(client: Client, message: Message):
 
 @bot.on_message()
 async def unknown_message(client: Client, message: Message):
-    print(message)
     await message.reply(
         "Неизвестная команда. "
         "Введите /help для получения списка команд"

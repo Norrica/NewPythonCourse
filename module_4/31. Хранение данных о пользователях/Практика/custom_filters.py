@@ -18,7 +18,6 @@ def inline_button_filter(inline_button: InlineKeyboardButton):
 
 def reply_text_filter(text: str):
     async def func(_, __, message: Message):
-        print(message.reply_to_message.text, text)
         return message.reply_to_message and message.reply_to_message.text == text
 
     return filters.create(func, "ReplyTextFilter", text=text)
