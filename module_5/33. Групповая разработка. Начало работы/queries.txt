@@ -7,7 +7,8 @@ create table IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS games (
   id integer PRIMARY KEY AUTOINCREMENT,
   status integer not NULL,
-  created_at integer NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at integer NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  winner_id text
 );
 
 CREATE TABLE IF NOT EXISTS game_user (
@@ -33,3 +34,4 @@ CREATE TABLE IF NOT EXISTS moves (
 	sign TEXT NOT NULL,
 	created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+create unique index game_id_col_row_moves on moves (game_id, col, row);

@@ -1,19 +1,11 @@
-import datetime
-import sqlite3
 import json
+import sys
 import traceback
-import uuid
-from enum import Enum
+import apsw
 
 from flask import Flask, request
 
-
-# GAME STATUSES
-class GameStatus(Enum):
-    NEW = 0
-    ACTIVE = 1
-    FINISHED = 2
-
+from models import GameStatus, User, GameUser, Game, Move, Rating
 
 def check_winner(board):
     # Проверка горизонтальных и вертикальных комбинаций
@@ -32,47 +24,10 @@ def check_winner(board):
     # Если ни один из игроков не выиграл
     return None
 
-class User:
-    def __init__(self, user_id: str, tg_id: int, username: str):
-        self.user_id = user_id
-        self.tg_id = tg_id
-        self.username = username
-
-
-class GameUser:
-    def __init__(self, user_id: str, username: str, sign: str):
-        self.user_id = user_id
-        self.username = username
-        self.sign = sign
-
-
-class Game:
-    def __init__(self, game_id: int, status: GameStatus, created_at: int):
-        self.game_id = game_id
-        self.status = status
-        self.created_at = created_at
-
-
-class Move:
-    def __init__(self, move_id: int, game_id: int, user_id: str, row: int, col: int, sign: str, created_at: int):
-        self.move_id = move_id
-        self.game_id = game_id
-        self.user_id = user_id
-        self.row = row
-        self.col = col
-        self.sign = sign
-        self.created_at = created_at
-
-
-class Rating:
-    def __init__(self, username: str, wins: int):
-        self.username = username
-        self.wins = wins
-
 
 class Database:
     def __init__(self):
-        self.database = sqlite3.connect('sqlite.db')
+        self.database = apsw.Connection('sqlite.db')
         self.cursor = self.database.cursor()
 
     def close(self):
@@ -91,9 +46,9 @@ class Database:
             user = cursor.fetchone()
             if user is None:
                 return None
-            return User(user[0], user[1], user[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return User(*user)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def create_user(self, user_id: str, tg_id: int, username: str) -> User | None:
@@ -101,10 +56,9 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('INSERT INTO users VALUES (?, ?, ?) RETURNING *', (user_id, tg_id, username))
             user = cursor.fetchone()
-            self.database.commit()
-            return User(user[0], user[1], user[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return User(*user)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_game_by_status(self, status: GameStatus) -> Game | None:
@@ -114,32 +68,34 @@ class Database:
             game = cursor.fetchone()
             if game is None:
                 return None
-            return Game(game[0], game[1], game[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_game_by_user_id_and_status(self, user_id: str, status: GameStatus) -> Game | None:
-        query = "SELECT games.* from games " \
-                "JOIN game_user ON game_user.game_id = games.id " \
-                "WHERE game_user.user_id = ? AND games.status = ?"
-        args = (user_id, status.value)
-        cursor = self.database.cursor()
-        cursor.execute(query, args)
-        game = cursor.fetchone()
-        if game is None:
-            return None
-        return Game(game[0], game[1], game[2])
+        try:
+            query = "SELECT games.* from games " \
+                    "JOIN game_user ON game_user.game_id = games.id " \
+                    "WHERE game_user.user_id = ? AND games.status = ?"
+            args = (user_id, status.value)
+            cursor = self.database.cursor()
+            cursor.execute(query, args)
+            game = cursor.fetchone()
+            if game is None:
+                return None
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
 
     def create_game(self):
         try:
             cursor = self.database.cursor()
             cursor.execute('INSERT INTO games (status) VALUES (?) RETURNING *', (GameStatus.NEW.value, ))
             game = cursor.fetchone()
-            self.database.commit()
-            return Game(game[0], game[1], game[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def add_user_to_game(self, game_id: int, user_id: str, sign: str):
@@ -147,21 +103,37 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('INSERT INTO game_user (game_id, user_id, sign) VALUES (?, ?, ?)', (game_id, user_id, sign))
             user = self.get_user(user_id, None)
-            self.database.commit()
             return GameUser(user.user_id, user.username, sign)
-        except Exception as e:
-            print(traceback.format_exc())
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
-    def update_game(self, game_id: int, status: GameStatus) -> Game | None:
+    def remove_user_from_game(self, game_id: int, user_id: str):
+        try:
+            cursor = self.database.cursor()
+            cursor.execute('DELETE FROM game_user WHERE game_id = ? AND user_id = ?', (game_id, user_id))
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
+            return None
+
+    def update_game_status(self, game_id: int, status: GameStatus) -> Game | None:
         try:
             cursor = self.database.cursor()
             cursor.execute("UPDATE games SET status = ? WHERE id = ? RETURNING *", (status.value, game_id))
             game = cursor.fetchone()
-            self.database.commit()
-            return Game(game[0], game[1], game[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
+            return None
+
+    def update_game_winner(self, game_id: int, winner_id: str) -> Game | None:
+        try:
+            cursor = self.database.cursor()
+            cursor.execute("UPDATE games SET winner_id = ? WHERE id = ? RETURNING *", (winner_id, game_id))
+            game = cursor.fetchone()
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_game_users(self, game_id: int) -> list[GameUser] | None:
@@ -171,10 +143,10 @@ class Database:
             args = (game_id, )
             cursor.execute(query, args)
             rows = cursor.fetchall()
-            users = [GameUser(x[0], x[1], x[2]) for x in rows]
+            users = [GameUser(*x) for x in rows]
             return users
-        except Exception as e:
-            print(traceback.format_exc())
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_game_by_id(self, game_id: int) -> Game | None:
@@ -184,9 +156,9 @@ class Database:
             game = cursor.fetchone()
             if game is None:
                 return None
-            return Game(game[0], game[1], game[2])
-        except Exception as e:
-            print(traceback.format_exc())
+            return Game(*game)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_moves(self, game_id: int) -> list[Move] | None:
@@ -194,10 +166,10 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('SELECT * FROM moves WHERE game_id = ? ORDER BY created_at', (game_id, ))
             rows = cursor.fetchall()
-            moves = [Move(x[0], x[1], x[2], x[3], x[4], x[5], x[6]) for x in rows]
+            moves = [Move(*x) for x in rows]
             return moves
-        except Exception as e:
-            print(traceback.format_exc())
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def create_move(self, game_id: int, user_id: str, col: int, row: int, sign: str):
@@ -205,10 +177,9 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('INSERT INTO moves (game_id, user_id, col, row, sign) VALUES (?, ?, ?, ?, ?) RETURNING *', (game_id, user_id, col, row, sign))
             move = cursor.fetchone()
-            self.database.commit()
-            return Move(move[0], move[1], move[2], move[3], move[4], move[5], move[6])
-        except Exception as e:
-            print(traceback.format_exc())
+            return Move(*move)
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def create_win(self, game_id: int, user_id: str):
@@ -216,10 +187,9 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('INSERT INTO wins (game_id, user_id) VALUES (?, ?) RETURNING *', (game_id, user_id))
             win = cursor.fetchone()
-            self.database.commit()
             return win
-        except Exception as e:
-            print(traceback.format_exc())
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
     def get_rating(self):
@@ -227,10 +197,10 @@ class Database:
             cursor = self.database.cursor()
             cursor.execute('SELECT users.username, COUNT(wins.user_id) FROM users JOIN wins ON wins.user_id = users.id GROUP BY users.username ORDER BY COUNT(wins.user_id) DESC')
             rows = cursor.fetchall()
-            rating = [Rating(x[0], x[1]) for x in rows]
+            rating = [Rating(*x) for x in rows]
             return rating
-        except Exception as e:
-            print(traceback.format_exc())
+        except Exception:
+            print(traceback.format_exc(), file=sys.stderr)
             return None
 
 
@@ -318,24 +288,22 @@ def join_game():
         db.close()
         return Response(200, {"game": already_joined_game.__dict__, "users": [x.__dict__ for x in game_users]}).json()
 
-    already_waiting_game = db.get_game_by_user_id_and_status(user_id, GameStatus.NEW)
-    if already_waiting_game is not None:
-        game_users = db.get_game_users(already_waiting_game.game_id)
-        db.close()
-        return Response(200, {"game": already_waiting_game.__dict__, "users": [x.__dict__ for x in game_users]}).json()
-
     game = db.get_game_by_status(GameStatus.NEW)
     if game is not None:
-        game_user = db.add_user_to_game(game.game_id, user_id, '0')
+        game_users = db.get_game_users(game.game_id)
+        sign = '0' if len(game_users) == 1 else 'X'
+
+        game_user = db.add_user_to_game(game.game_id, user_id, sign)
         if game_user is None:
             db.close()
             return Response(500, 'error while adding user to game').json()
 
-        game_users = db.get_game_users(game.game_id)
-        game = db.update_game(game.game_id, GameStatus.ACTIVE)
-        if game is None:
-            db.close()
-            return Response(500, 'error while starting game').json()
+        game_users.append(game_user)
+        if len(game_users) == 2:
+            game = db.update_game_status(game.game_id, GameStatus.ACTIVE)
+            if game is None:
+                db.close()
+                return Response(500, 'error while starting game').json()
         db.close()
         return Response(200, {"game": game.__dict__, "users": [x.__dict__ for x in game_users]}).json()
 
@@ -351,6 +319,37 @@ def join_game():
 
     db.close()
     return Response(200, {"game": game.__dict__, "users": [game_user.__dict__]}).json()
+
+
+@app.route('/leave_game')
+def leave_game():
+    user_id = request.args.get('user_id', None, str)
+    game_id = request.args.get('game_id', None, int)
+    if user_id is None:
+        return Response(400, 'user_id is required').json()
+    if game_id is None:
+        return Response(400, 'game_id is required').json()
+
+    db = Database()
+
+    game = db.get_game_by_id(game_id)
+    if game is None:
+        db.close()
+        return Response(404, 'game not found').json()
+
+    game_users = db.get_game_users(game_id)
+    if len(game_users) == 1:
+        db.update_game_status(game_id, GameStatus.NEW)
+    elif len(game_users) == 2:
+        db.update_game_status(game_id, GameStatus.FINISHED)
+        winner = [x for x in game_users if x.user_id != user_id][0]
+        db.create_win(game_id, winner.user_id)
+        db.update_game_winner(game_id, winner.user_id)
+
+    db.remove_user_from_game(game_id, user_id)
+
+    db.close()
+    return Response(200, {"removed": "ok"}).json()
 
 
 @app.route('/get_game_info')
@@ -395,6 +394,16 @@ def make_move():
         db.close()
         return Response(404, 'game not found').json()
 
+    moves = db.get_moves(game_id)
+    count_x = len([x for x in moves if x.sign == 'X'])
+    count_0 = len([x for x in moves if x.sign == '0'])
+    if sign == 'X' and count_x > count_0:
+        db.close()
+        return Response(400, 'not your turn').json()
+    if sign == '0' and count_0 >= count_x:
+        db.close()
+        return Response(400, 'not your turn').json()
+
     move = db.create_move(game_id, user_id, col, row, sign)
     if move is None:
         db.close()
@@ -407,16 +416,17 @@ def make_move():
 
     winner_sign = check_winner(board)
     if winner_sign is not None:
-        game = db.update_game(game_id, GameStatus.FINISHED)
+        game = db.update_game_status(game_id, GameStatus.FINISHED)
         if game is None:
             db.close()
             return Response(500, 'error while finishing game').json()
         users = db.get_game_users(game_id)
         winner = [x for x in users if x.sign == winner_sign][0]
         db.create_win(game_id, winner.user_id)
+        db.update_game_winner(game_id, winner.user_id)
 
     if len(moves) == 9:
-        game = db.update_game(game_id, GameStatus.FINISHED)
+        game = db.update_game_status(game_id, GameStatus.FINISHED)
         if game is None:
             db.close()
             return Response(500, 'error while finishing game').json()
@@ -442,4 +452,4 @@ def ping():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=False)
