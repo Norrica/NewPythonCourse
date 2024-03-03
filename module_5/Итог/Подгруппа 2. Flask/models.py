@@ -1,16 +1,6 @@
 from enum import Enum
 
 
-class State(Enum):
-    MENU = 0            # Главное меню
-    RATING = 1          # Рейтинг
-    GAME_WAITING = 2    # Ожидание начала игры
-    GAME_RUNNING = 3    # Игра
-    GAME_FINISHED = 4   # Игра завершена
-    SERVER_PENDING = 5  # Ожидание ответа от сервера
-    STOPPING = 6        # Остановка игры
-
-
 class GameStatus(Enum):
     NEW = 0
     ACTIVE = 1

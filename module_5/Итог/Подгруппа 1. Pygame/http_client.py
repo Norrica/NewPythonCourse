@@ -16,15 +16,11 @@ def run_in_thread(func):
 
 class HttpClient:
     def __init__(self):
-        self.url = "https://deeppythontestasd.pythonanywhere.com"
-
-    def ping(self) -> bool:
-        response = requests.get(f"{self.url}/ping").json()
-        return response["status"] == 200
+        self.host = "https://deeppythontestasd.pythonanywhere.com"
 
     def get_user(self, user_id: str) -> User | None:
         try:
-            response = requests.get(f"{self.url}/get_user?user_id={user_id}").json()
+            response = requests.get(f"{self.host}/get_user?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
@@ -34,7 +30,7 @@ class HttpClient:
 
     def get_active_game_by_user_id(self, user_id: str) -> tuple[Game, list[GameUser], list[Move]] | None:
         try:
-            response = requests.get(f"{self.url}/get_active_game_by_user_id?user_id={user_id}").json()
+            response = requests.get(f"{self.host}/get_active_game_by_user_id?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
@@ -48,7 +44,7 @@ class HttpClient:
 
     def join_game(self, user_id: str) -> tuple[Game, list[GameUser]] | None:
         try:
-            response = requests.get(f"{self.url}/join_game?user_id={user_id}").json()
+            response = requests.get(f"{self.host}/join_game?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
@@ -61,7 +57,7 @@ class HttpClient:
 
     def get_game_info(self, game_id: int) -> tuple[Game, list[GameUser], list[Move]] | None:
         try:
-            response = requests.get(f"{self.url}/get_game_info?game_id={game_id}").json()
+            response = requests.get(f"{self.host}/get_game_info?game_id={game_id}").json()
             if response["status"] != 200:
                 return None
 
@@ -77,7 +73,7 @@ class HttpClient:
     def make_move(self, user_id: str, game_id: int, row: int, col: int, sign: str) -> Move | None:
         try:
             response = requests.get(
-                f"{self.url}/make_move?user_id={user_id}&game_id={game_id}&row={row}&col={col}&sign={sign}").json()
+                f"{self.host}/make_move?user_id={user_id}&game_id={game_id}&row={row}&col={col}&sign={sign}").json()
             if response["status"] != 200:
                 return None
 
@@ -87,7 +83,7 @@ class HttpClient:
 
     def get_rating(self) -> list[Rating] | None:
         try:
-            response = requests.get(f"{self.url}/get_rating").json()
+            response = requests.get(f"{self.host}/get_rating").json()
             if response["status"] != 200:
                 return None
 
@@ -97,7 +93,7 @@ class HttpClient:
 
     def leave_game(self, user_id: str, game_id: str) -> bool:
         try:
-            response = requests.get(f"{self.url}/leave_game?user_id={user_id}&game_id={game_id}").json()
+            response = requests.get(f"{self.host}/leave_game?user_id={user_id}&game_id={game_id}").json()
 
             return response["status"] == 200
         except:

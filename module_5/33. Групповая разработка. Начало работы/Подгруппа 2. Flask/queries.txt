@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS game_user (
   id integer PRIMARY KEY AUTOINCREMENT,
   game_id integer not NULL,
   user_id text not NULL,
-  sign integer not NULL,
+  sign integer not NULL
 );
 
 CREATE TABLE IF NOT EXISTS wins (
@@ -34,4 +34,4 @@ CREATE TABLE IF NOT EXISTS moves (
 	sign TEXT NOT NULL,
 	created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-create unique index game_id_col_row_moves on moves (game_id, col, row);
+CREATE UNIQUE INDEX game_id_col_row_moves ON moves (game_id, col, row);
