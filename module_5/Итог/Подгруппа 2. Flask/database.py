@@ -58,7 +58,7 @@ class Database:
 
     def get_game_by_user_id_and_status(self, user_id: str, status: GameStatus) -> Game | None:
         try:
-            query = "SELECT games.* from games " \
+            query = "SELECT games.* FROM games " \
                     "JOIN game_user ON game_user.game_id = games.id " \
                     "WHERE game_user.user_id = ? AND games.status = ?"
             args = (user_id, status.value)
@@ -122,7 +122,9 @@ class Database:
     def get_game_users(self, game_id: int) -> list[GameUser] | None:
         try:
             cursor = self.database.cursor()
-            query = "SELECT users.id, users.username, game_user.sign FROM users JOIN game_user ON game_user.user_id = users.id WHERE game_user.game_id = ?"
+            query = "SELECT users.id, users.username, game_user.sign FROM users " \
+                    "JOIN game_user ON game_user.user_id = users.id " \
+                    "WHERE game_user.game_id = ?"
             args = (game_id, )
             cursor.execute(query, args)
             rows = cursor.fetchall()

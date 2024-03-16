@@ -5,9 +5,11 @@ import time
 import traceback
 from threading import Thread
 
+import models
+
 import pygame
 
-import http_client
+from http_client import HttpClient
 from models import State, GameStatus
 
 # Инициализация Pygame
@@ -37,19 +39,20 @@ BUTTON_HEIGHT = 50
 BUTTON_COLOR = (19, 128, 117)  # Черный
 BUTTON_TEXT_COLOR = (255, 255, 255)  # Белый
 
-PWD = os.path.abspath(os.path.dirname(__file__))
-user_file_exists = os.path.isfile(os.path.join(PWD, ".user"))
+user_file_name = ".user"
+user_file_exists = os.path.isfile(user_file_name)
 if not user_file_exists:
-    logging.error("Файл .user не найден. Создаю новый.")
-    with open(os.path.join(PWD, ".user"), "w") as user_file:
+    logging.error(f"Файл {user_file_name} не найден. Создаю новый.")
+    with open(user_file_name, "w") as user_file:
         user_file.write(input("Введи идентификатор пользователя: "))
 
 
-with open(os.path.join(PWD, ".user"), "r") as user_file:
+with open(user_file_name, "r") as user_file:
     user_id = user_file.read()
     if user_id == "":
-        logging.error("Идентификатор пользователя не найден. Положи его в файл .user")
+        logging.error(f"Идентификатор пользователя не найден. Положи его в файл {user_file_name}")
         sys.exit(1)
+
 
 # Создаем кнопку "Играть"
 play_button_rect = pygame.Rect(WIDTH // 2 - BUTTON_WIDTH // 2, HEIGHT // 2 - BUTTON_HEIGHT // 2, BUTTON_WIDTH,
@@ -63,7 +66,7 @@ pygame.display.set_caption("Крестики-нолики")
 
 class Game:
     def __init__(self):
-        self.http_client = http_client.HttpClient()
+        self.http_client = HttpClient()
 
         self.user = None
 
@@ -71,7 +74,7 @@ class Game:
         self.player = None
         self.enemy = None
         self.game = None
-        self.game_users = []
+        self.players = []
         self.moves = []
         self.current_state = State.MENU
         self.can_make_move = False
@@ -84,7 +87,7 @@ class Game:
         while self.user is None:
             user = self.http_client.get_user(user_id)
             if user is None:
-                logging.error("Пользователь с таким идентификатором не найден. Проверьте файл .user или подключение к серверу")
+                logging.error(f"Пользователь с таким идентификатором не найден. Проверьте файл {user_file_name} или подключение к серверу")
                 time.sleep(1)
                 continue
 
@@ -92,16 +95,16 @@ class Game:
 
             already_running_game = self.http_client.get_active_game_by_user_id(user.user_id)
             if already_running_game is not None:
-                game, game_users, moves = already_running_game
-                self.update_game_info(game, game_users, moves, State.GAME_RUNNING)
+                game, players, moves = already_running_game
+                self.update_game_info(game, players, moves, State.GAME_RUNNING)
 
-    def update_game_info(self, game: http_client.Game, game_users: list[http_client.GameUser], moves: list[http_client.Move], current_state: State):
+    def update_game_info(self, game: models.Game, players: list[models.Player], moves: list[models.Move], current_state: State):
         self.game = game
         self.moves = moves
         self.refill_board(moves)
-        self.player = [user for user in game_users if user.user_id == self.user.user_id][0] if len(game_users) == 2 else None
-        self.enemy = [user for user in game_users if user.user_id != self.user.user_id][0] if len(game_users) == 2 else None
-        self.game_users = game_users
+        self.player = [user for user in players if user.user_id == self.user.user_id][0] if len(players) == 2 else None
+        self.enemy = [user for user in players if user.user_id != self.user.user_id][0] if len(players) == 2 else None
+        self.players = players
         self.current_state = current_state
 
     def draw_lines(self):
@@ -138,9 +141,9 @@ class Game:
                     pygame.draw.circle(self.screen, CIRCLE_COLOR, center, CIRCLE_RADIUS, CIRCLE_WIDTH)
 
     # Отображение никнеймов
-    def draw_nicknames(self, game_users):
+    def draw_nicknames(self, players):
         font = pygame.font.SysFont("Arial", FONT_SIZE, True)
-        user1, user2 = game_users
+        user1, user2 = players
         # делаем так, чтобы крестики всегда были слева
         if user1.sign == '0':
             user1, user2 = user2, user1
@@ -245,7 +248,7 @@ class Game:
 
     def reset_game(self):
         self.game = None
-        self.game_users = []
+        self.players = []
         self.moves = []
         self.board = [[None] * BOARD_ROWS for _ in range(BOARD_COLS)]
         self.can_make_move = False
@@ -273,30 +276,30 @@ class Game:
                 time.sleep(0.5)
 
                 if self.current_state == State.GAME_WAITING:
-                    game, game_users, moves = None, [], []
+                    game, players, moves = None, [], []
                     if self.game is None:
                         response = self.http_client.join_game(self.user.user_id)
                         if response is None:
                             continue
-                        game, game_users = response
+                        game, players = response
                     else:
                         game_info = self.http_client.get_game_info(self.game.game_id)
                         if game_info is None:
                             continue
-                        game, game_users, moves = game_info
+                        game, players, moves = game_info
 
                     if game is not None:
-                        state = State.GAME_RUNNING if len(game_users) == 2 else State.GAME_WAITING
-                        self.update_game_info(game, game_users, moves, state)
+                        state = State.GAME_RUNNING if len(players) == 2 else State.GAME_WAITING
+                        self.update_game_info(game, players, moves, state)
                         continue
 
                 if self.current_state == State.GAME_RUNNING:
                     game_info = self.http_client.get_game_info(self.game.game_id)
                     if game_info is None:
                         continue
-                    game, game_users, moves = game_info
+                    game, players, moves = game_info
                     state = State.GAME_RUNNING if game.status == GameStatus.ACTIVE.value else State.GAME_FINISHED
-                    self.update_game_info(game, game_users, moves, state)
+                    self.update_game_info(game, players, moves, state)
 
                 if self.current_state == State.RATING and self.rating is None:
                     rating = self.http_client.get_rating()
@@ -342,7 +345,7 @@ class Game:
 
         self.can_make_move = self.check_can_make_move()
 
-        self.draw_nicknames(self.game_users)
+        self.draw_nicknames(self.players)
         self.draw_lines()
         self.draw_figures()
 
