@@ -2,7 +2,7 @@ import threading
 
 import requests
 
-from models import User, Game, GameUser, Move, Rating
+from models import User, Game, Player, Move, Rating
 
 
 def run_in_thread(func):
@@ -28,44 +28,44 @@ class HttpClient:
         except:
             return None
 
-    def get_active_game_by_user_id(self, user_id: str) -> tuple[Game, list[GameUser], list[Move]] | None:
+    def get_active_game_by_user_id(self, user_id: str) -> tuple[Game, list[Player], list[Move]] | None:
         try:
             response = requests.get(f"{self.host}/get_active_game_by_user_id?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
             game = Game(**response["body"]["game"])
-            users = [GameUser(**user) for user in response["body"]["users"]]
+            players = [Player(**user) for user in response["body"]["users"]]
             moves = [Move(**move) for move in response["body"]["moves"]]
 
-            return game, users, moves
+            return game, players, moves
         except:
             return None
 
-    def join_game(self, user_id: str) -> tuple[Game, list[GameUser]] | None:
+    def join_game(self, user_id: str) -> tuple[Game, list[Player]] | None:
         try:
             response = requests.get(f"{self.host}/join_game?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
             game = Game(**response["body"]["game"])
-            users = [GameUser(**user) for user in response["body"]["users"]]
+            users = [Player(**user) for user in response["body"]["users"]]
 
             return game, users
         except:
             return None
 
-    def get_game_info(self, game_id: int) -> tuple[Game, list[GameUser], list[Move]] | None:
+    def get_game_info(self, game_id: int) -> tuple[Game, list[Player], list[Move]] | None:
         try:
             response = requests.get(f"{self.host}/get_game_info?game_id={game_id}").json()
             if response["status"] != 200:
                 return None
 
             game = Game(**response["body"]["game"])
-            users = [GameUser(**user) for user in response["body"]["users"]]
+            players = [Player(**user) for user in response["body"]["users"]]
             moves = [Move(**move) for move in response["body"]["moves"]]
 
-            return game, users, moves
+            return game, players, moves
         except:
             return None
 
