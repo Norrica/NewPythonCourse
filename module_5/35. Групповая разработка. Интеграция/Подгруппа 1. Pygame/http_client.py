@@ -1,22 +1,15 @@
-import threading
+# Внимание! Код в хранилище может отличаться от кода в репозитории.
+# Код в репозитории обновляется гораздо быстрее, чем код в хранилище,
+# если вдруг вносятся какие-то фиксы багов.
+# Ссылка на репозиторий: https://github.com/Norrica/NewPythonCourse
 
 import requests
 
-from models import User, Game, Player, Move, Rating
-
-
-def run_in_thread(func):
-    def wrapper(*args, **kwargs):
-        result_container = {"result": None}
-        thread = threading.Thread(target=lambda: result_container.update(result=func(*args, **kwargs)))
-        thread.start()
-        return result_container["result"]
-    return wrapper
-
+from models import User, Game, Player, Move
 
 class HttpClient:
     def __init__(self):
-        self.host = "https://tictac.redko.us"
+        self.host = "https://tictac.redko.us/"
 
     def get_user(self, user_id: str) -> User | None:
         try:
@@ -42,19 +35,6 @@ class HttpClient:
         except:
             return None
 
-    def join_game(self, user_id: str) -> tuple[Game, list[Player]] | None:
-        try:
-            response = requests.get(f"{self.host}/join_game?user_id={user_id}").json()
-            if response["status"] != 200:
-                return None
-
-            game = Game(**response["body"]["game"])
-            users = [Player(**user) for user in response["body"]["users"]]
-
-            return game, users
-        except:
-            return None
-
     def get_game_info(self, game_id: int) -> tuple[Game, list[Player], list[Move]] | None:
         try:
             response = requests.get(f"{self.host}/get_game_info?game_id={game_id}").json()
@@ -69,25 +49,16 @@ class HttpClient:
         except:
             return None
 
-    @run_in_thread
-    def make_move(self, user_id: str, game_id: int, row: int, col: int, sign: str) -> Move | None:
+    def join_game(self, user_id: str) -> tuple[Game, list[Player]] | None:
         try:
-            url = f"{self.host}/make_move?user_id={user_id}&game_id={game_id}&row={row}&col={col}&sign={sign}"
-            response = requests.get(url).json()
+            response = requests.get(f"{self.host}/join_game?user_id={user_id}").json()
             if response["status"] != 200:
                 return None
 
-            return Move(**response["body"]["move"])
-        except:
-            return None
+            game = Game(**response["body"]["game"])
+            users = [Player(**user) for user in response["body"]["users"]]
 
-    def get_rating(self) -> list[Rating] | None:
-        try:
-            response = requests.get(f"{self.host}/get_rating").json()
-            if response["status"] != 200:
-                return None
-
-            return [Rating(**rating) for rating in response["body"]["rating"]]
+            return game, users
         except:
             return None
 
@@ -98,3 +69,14 @@ class HttpClient:
             return response["status"] == 200
         except:
             return False
+
+    def make_move(self, user_id: str, game_id: int, row: int, col: int, sign: str) -> Move | None:
+        try:
+            url = f"{self.host}/make_move?user_id={user_id}&game_id={game_id}&row={row}&col={col}&sign={sign}"
+            response = requests.get(url).json()
+            if response["status"] != 200:
+                return None
+
+            return Move(**response["body"]["move"])
+        except:
+            return None

@@ -1,12 +1,9 @@
+# Внимание! Код в хранилище может отличаться от кода в репозитории.
+# Код в репозитории обновляется гораздо быстрее, чем код в хранилище,
+# если вдруг вносятся какие-то фиксы багов.
+# Ссылка на репозиторий: https://github.com/Norrica/NewPythonCourse
+
 from enum import Enum
-
-
-class State(Enum):
-    MENU = 0            # Главное меню
-    GAME_WAITING = 1    # Ожидание начала игры
-    GAME_RUNNING = 2    # Игра
-    GAME_FINISHED = 3   # Игра завершена
-    RATING = 4          # Рейтинг
 
 
 class GameStatus(Enum):
@@ -22,11 +19,11 @@ class User:
         self.username = username
 
 
-class Player:
+class GameUser:
     def __init__(self, user_id: str, username: str, sign: str):
         self.user_id = user_id
         self.username = username
-        self.sign = str(sign)
+        self.sign = sign
 
 
 class Game:
