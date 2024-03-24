@@ -25,7 +25,7 @@ class Player:
     def __init__(self, user_id: str, username: str, sign: str):
         self.user_id = user_id
         self.username = username
-        self.sign = sign
+        self.sign = str(sign)
 
 
 class Game:
@@ -43,5 +43,5 @@ class Move:
         self.user_id = user_id
         self.row = row
         self.col = col
-        self.sign = sign
+        self.sign = str(sign)
         self.created_at = created_at
